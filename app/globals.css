@@ -1,0 +1,511 @@
+@import "tailwindcss";
+
+@theme {
+  --color-espresso: #35231b;
+  --color-ink: #2b2420;
+  --color-cream: #fbf8f4;
+  --color-sand: #d8ccbc;
+  --color-black: #0f0f0f;
+  --color-muted: #5c4b42;
+  --color-line: rgb(53 35 27 / 0.16);
+
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-quick: cubic-bezier(0.4, 0, 1, 1);
+  --ease-std: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Page gutter: 16px on phones, 64px at 1280, capped at 72px. */
+@utility wrap {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 4.5vw, 72px);
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --gutter: clamp(16px, 4.5vw, 72px);
+  }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+  }
+  body {
+    background: #fff;
+    color: var(--color-black);
+    font-family: var(--font-sans);
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-sand);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-espresso);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .on-dark :focus-visible {
+    outline-color: #fff;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  p, blockquote {
+    text-wrap: pretty;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@layer components {
+  /* ---------- Buttons: fill wipe on hover / focus ---------- */
+  .btn {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: 2px;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      color 200ms var(--ease-std),
+      transform 120ms var(--ease-std);
+  }
+  /* The wipe overshoots by 1px so no sliver of the base colour shows at the edges. */
+  .btn::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    background: var(--wipe, var(--color-sand));
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 200ms var(--ease-in-quick);
+  }
+  .btn:hover::before,
+  .btn:focus-visible::before {
+    transform: scaleX(1);
+    transform-origin: left center;
+    transition: transform 280ms var(--ease-out-expo);
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+  .btn-light {
+    background: #fff;
+    color: var(--color-espresso);
+    --wipe: var(--color-sand);
+  }
+  .btn-dark {
+    background: var(--color-espresso);
+    color: #fff;
+    --wipe: var(--color-sand);
+  }
+  .btn-dark:hover,
+  .btn-dark:focus-visible {
+    color: var(--color-espresso);
+  }
+  .btn-ink {
+    background: var(--color-ink);
+    color: #fff;
+    --wipe: #fff;
+  }
+  .btn-ink:hover,
+  .btn-ink:focus-visible {
+    color: var(--color-ink);
+  }
+
+  /* ---------- Header ---------- */
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 40;
+    height: 72px;
+    color: #fff;
+    transition:
+      transform 280ms var(--ease-out-expo),
+      background-color 200ms var(--ease-std),
+      color 200ms var(--ease-std),
+      box-shadow 200ms var(--ease-std);
+  }
+  @media (min-width: 768px) {
+    .site-header {
+      height: 96px;
+    }
+  }
+  .site-header[data-state="solid"] {
+    background: #fff;
+    color: var(--color-espresso);
+    box-shadow: 0 1px 0 var(--color-line);
+  }
+  .site-header[data-state="hidden"] {
+    background: #fff;
+    color: var(--color-espresso);
+    transform: translateY(-100%);
+    transition:
+      transform 240ms var(--ease-in-quick),
+      background-color 200ms var(--ease-std);
+  }
+  /* Open menu: the header bar joins the sand panel below it. */
+  .site-header[data-menu="open"] {
+    background: var(--color-sand);
+    color: var(--color-espresso);
+    box-shadow: none;
+    transform: none;
+  }
+  .site-header .logo-dark {
+    opacity: 0;
+  }
+  .site-header[data-state="solid"] .logo-dark,
+  .site-header[data-state="hidden"] .logo-dark,
+  .site-header[data-menu="open"] .logo-dark {
+    opacity: 1;
+  }
+  .site-header[data-state="solid"] .logo-light,
+  .site-header[data-state="hidden"] .logo-light,
+  .site-header[data-menu="open"] .logo-light {
+    opacity: 0;
+  }
+  .site-header[data-state="solid"] .cta-top,
+  .site-header[data-state="hidden"] .cta-top {
+    background: var(--color-espresso);
+    color: #fff;
+  }
+  .site-header[data-state="solid"] .cta-top:hover,
+  .site-header[data-state="solid"] .cta-top:focus-visible {
+    color: var(--color-espresso);
+  }
+  .nav-link {
+    position: relative;
+    padding: 8px 0;
+  }
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 2px 0;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 150ms var(--ease-in-quick);
+  }
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+    transition: transform 200ms var(--ease-out-expo);
+  }
+
+  /* Menu button: two lines that morph into an X */
+  .burger-lines {
+    display: grid;
+    gap: 7px;
+  }
+  .burger-lines > span {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: currentColor;
+    transition: transform 280ms var(--ease-out-expo);
+  }
+  [data-menu="open"] .burger-lines > span:first-child {
+    transform: translateY(4.25px) rotate(45deg);
+  }
+  [data-menu="open"] .burger-lines > span:last-child {
+    transform: translateY(-4.25px) rotate(-45deg);
+  }
+
+  /* Mobile menu: a full-screen sand panel under the header (Figma 445:1523 / 482:1575) */
+  .menu-panel {
+    position: absolute;
+    inset: 100% 0 auto 0;
+    height: calc(100vh - 72px);
+    height: calc(100dvh - 72px);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--color-sand);
+    color: var(--color-black);
+    padding: 20px var(--gutter) max(32px, env(safe-area-inset-bottom));
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 200ms var(--ease-in-quick),
+      visibility 0s linear 200ms;
+  }
+  [data-menu="open"] .menu-panel {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity 280ms var(--ease-out-expo),
+      visibility 0s;
+  }
+  .menu-link {
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity 200ms var(--ease-in-quick),
+      transform 200ms var(--ease-in-quick);
+  }
+  [data-menu="open"] .menu-link {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 260ms var(--ease-out-expo) calc(var(--i) * 40ms + 60ms),
+      transform 260ms var(--ease-out-expo) calc(var(--i) * 40ms + 60ms);
+  }
+  /* "What we buy" submenu: rows open by animating the grid track, chevron flips. */
+  .submenu {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 200ms var(--ease-in-quick);
+  }
+  .submenu[data-open="true"] {
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 280ms var(--ease-out-expo);
+  }
+  .submenu > ul {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .submenu-chevron {
+    transition: transform 200ms var(--ease-out-expo);
+  }
+  [aria-expanded="true"] > .submenu-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ---------- Page intro: an espresso curtain that lifts once per session ----------
+     Hidden without JS; the head script adds .js, then .intro-go (lift) and .intro-done (hero plays). */
+  .intro {
+    display: none;
+  }
+  .js .intro {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: grid;
+    place-items: center;
+    background: var(--color-espresso);
+  }
+  .intro-mark {
+    opacity: 0;
+    animation: intro-mark-in 600ms var(--ease-out-expo) 150ms forwards;
+  }
+  .intro-go .intro {
+    animation: intro-lift 650ms var(--ease-in-quick) 120ms forwards;
+  }
+  .intro-go .intro-mark {
+    opacity: 1;
+    animation: intro-mark-out 240ms var(--ease-in-quick) forwards;
+  }
+  .intro-skip .intro,
+  .intro-gone .intro {
+    display: none;
+  }
+  /* Hold the hero's entrance until the curtain starts lifting. */
+  .js:not(.intro-done):not(.intro-skip) :is(.hero-media, .line-mask > span, .rise) {
+    animation-play-state: paused;
+  }
+
+  /* ---------- Hero load sequence ---------- */
+  .hero-media {
+    animation: settle 1800ms var(--ease-out-expo) both;
+  }
+  .line-mask {
+    display: block;
+    padding-bottom: 0.16em;
+    margin-bottom: -0.16em;
+    clip-path: inset(-0.5em -1em 0 -0.5em);
+  }
+  .line-mask > span {
+    display: block;
+    animation: unmask 900ms var(--ease-out-expo) both;
+    animation-delay: calc(var(--i) * 40ms + 160ms);
+  }
+  .rise {
+    animation: rise 800ms var(--ease-out-expo) both;
+    animation-delay: calc(var(--i) * 40ms + 240ms);
+  }
+
+  /* ---------- Scroll reveals (armed by JS; visible without it) ---------- */
+  [data-reveal] {
+    transition:
+      opacity 800ms var(--ease-out-expo) var(--d, 0ms),
+      transform 800ms var(--ease-out-expo) var(--d, 0ms);
+  }
+  [data-armed] [data-reveal]:not([data-in]) {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  .reveal-track > i {
+    position: absolute;
+    inset: 0;
+    background: var(--color-espresso);
+    transform-origin: left;
+    transition: transform 1400ms var(--ease-out-expo) 120ms;
+  }
+  [data-armed] .reveal-track:not([data-in]) > i {
+    transform: scaleX(0);
+  }
+  [data-armed] .reveal-track[data-reveal]:not([data-in]) {
+    opacity: 1;
+    transform: none;
+  }
+  .cat-media {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 1100ms var(--ease-out-expo) var(--d, 0ms);
+  }
+  [data-armed] .cat:not([data-in]) .cat-media {
+    clip-path: inset(100% 0 0 0);
+  }
+  [data-armed] .cat[data-reveal]:not([data-in]) {
+    opacity: 1;
+    transform: none;
+  }
+  .cat-media img {
+    transition: transform 280ms var(--ease-out-expo);
+  }
+  .cat:hover .cat-media img {
+    transform: scale(1.03);
+  }
+  .cat-arrow {
+    transition:
+      opacity 200ms var(--ease-out-expo),
+      transform 200ms var(--ease-out-expo);
+  }
+  @media (min-width: 768px) {
+    .cat-arrow {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+    .cat:hover .cat-arrow,
+    .cat:focus-visible .cat-arrow {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Horizontal snap rows on phones */
+  .snap-row {
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .snap-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Footer accordion chevron */
+  .acc[open] .acc-chevron {
+    transform: rotate(180deg);
+  }
+  .acc-chevron {
+    transition: transform 200ms var(--ease-out-expo);
+  }
+  .acc summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+@keyframes settle {
+  from { transform: scale(1.06); }
+  to { transform: scale(1); }
+}
+@keyframes unmask {
+  from { transform: translateY(105%); }
+  to { transform: translateY(0); }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes intro-mark-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes intro-mark-out {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes intro-lift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .intro {
+    display: none;
+  }
+  .hero-media,
+  .line-mask > span,
+  .rise {
+    animation: none;
+  }
+  [data-reveal],
+  .cat-media,
+  .reveal-track > i {
+    transition: opacity 300ms var(--ease-std);
+  }
+  [data-armed] [data-reveal]:not([data-in]) {
+    transform: none;
+  }
+  [data-armed] .cat:not([data-in]) .cat-media {
+    clip-path: inset(0 0 0 0);
+  }
+  [data-armed] .reveal-track:not([data-in]) > i {
+    transform: scaleX(1);
+  }
+  .btn::before,
+  .btn:hover::before,
+  .btn:focus-visible::before {
+    transform: none;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-std);
+  }
+  .btn:hover::before,
+  .btn:focus-visible::before {
+    opacity: 1;
+  }
+  .site-header,
+  .site-header[data-state="hidden"],
+  .menu-panel,
+  .menu-link,
+  .cat-media img,
+  .burger-lines > span {
+    transition-property: opacity, background-color, color, visibility;
+  }
+  .cat:hover .cat-media img {
+    transform: none;
+  }
+  .submenu,
+  .submenu[data-open="true"] {
+    transition: none;
+  }
+}
